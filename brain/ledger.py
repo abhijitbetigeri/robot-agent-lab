@@ -78,7 +78,13 @@ class Brain:
         for d in deltas:
             op = d.get("op")
             if op in ("add", "supersede"):
-                out.append(self.add(d["subject"], d["relation"], d["object"], d.get("tier", "fact"),
+                tier = str(d.get("tier", "fact")).lower().strip()
+                tier = {"facts": "fact", "procedures": "procedure", "insights": "insight", "lesson": "insight", "rule": "procedure"}.get(tier, tier)
+                if tier not in ("fact", "procedure", "insight"):
+                    tier = "insight"
+                if not all(k in d for k in ("subject", "relation", "object")):
+                    continue
+                out.append(self.add(str(d["subject"]), str(d["relation"]), d["object"], tier,
                                     source_agent, episode, d.get("evidence_ref"), float(d.get("confidence", 0.7))))
             elif op in ("upvote", "downvote") and d.get("id") is not None:
                 m = re.search(r"(\d+)", str(d["id"]))   # briefing shows ids as F#3 / P#2 / I#4
