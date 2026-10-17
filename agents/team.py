@@ -174,7 +174,16 @@ def claim_vs_trace(claim: dict | None, trace) -> dict:
         return {"ok": False, "reason": "no done claim"}
     ids = {c["call_id"]: c for c in trace.calls}
     missing, failed = [], []
-    for cid, refs in (claim.get("evidence") or {}).items():
+    evidence = claim.get("evidence") or {}
+    if isinstance(evidence, str):
+        try:
+            evidence = json.loads(evidence)
+        except Exception:  # noqa: BLE001
+            evidence = {}
+    if not isinstance(evidence, dict):
+        evidence = {}
+    claim["evidence"] = evidence
+    for cid, refs in evidence.items():
         if not isinstance(refs, list):
             refs = [refs]
         for r in refs or []:

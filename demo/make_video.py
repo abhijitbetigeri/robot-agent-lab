@@ -198,11 +198,13 @@ def ver_frame(frames: Path, episode: int) -> Path:
 def main():
     import imageio_ffmpeg
     ffmpeg = imageio_ffmpeg.get_ffmpeg_exe()
-    log = ROOT / "runs" / "sweep_brain.log"
+    log = ROOT / "runs" / "sweep_brain_tubes.log"
+    log_nb = ROOT / "runs" / "sweep_no_brain.log"
     frames = ROOT / "runs" / "brain" / "frames"
+    frames_nb = ROOT / "runs" / "no_brain" / "frames"
     db = sqlite3.connect(ROOT / "runs" / "brain" / "brain.sqlite")
     pb = json.loads((ROOT / "eval" / "playbook_v1.json").read_text())["history"][0]
-    sim_clip = OUT / "sim_shift2.mp4"
+    sim_clip = OUT / "sim_shift1.mp4"
     assert sim_clip.exists(), "run demo/record_sim.py first"
 
     segs: list[tuple[str, object, str]] = []   # (kind, image-or-clip, narration)
@@ -231,16 +233,16 @@ def main():
 
     # 3. the simulation, running
     segs.append(("clip", sim_clip,
-        "This is the actual simulation, replaying shift two from the operator's real tool calls. "
+        "This is the actual simulation, replaying a real shift from the operator's own tool calls. "
         "It looks through the camera, moves above the red tube, lowers, closes. The sticky gripper reports no hold, "
         "so it closes again, holding is true, and it carries the tube to the cold rack. Then the blue tube to the sequencer rack. "
         "The green control is left alone. It parks for a clear photo and claims done with evidence. The sealed verifier passes it."))
 
     # 4. why the verifier exists: shift 1 false done
-    l1 = log_lines(log, 1, ("gripper", "] lift"), limit=8)
+    l1 = log_lines(log_nb, 1, ("gripper", "] lift"), limit=8)
     segs.append(("still", slide("Shift 1: the robot says it is done. It is not.", [("what the robot actually did (real log):", DIM)] + l1 +
                  [("", FG), ("robot: \"done\"", ACC), ("independent checker: FAIL", RED), ("  the red tube is not in the red rack", RED)],
-                 image=ver_frame(frames, 1), img_caption="the photo the checker judged from", footer="runs/sweep_brain.log, shift 1"),
+                 image=ver_frame(frames_nb, 1), img_caption="the photo the checker judged from", footer="runs/sweep_no_brain.log, shift 1"),
         "Shift one, with empty memory. The gripper reports nothing held. The robot lifts nothing, places nothing, and says it is done anyway. "
         "An independent checker that only sees the photo says no. Agents overclaim. That is why the check is independent."))
 
@@ -252,23 +254,23 @@ def main():
     for i, o, vf, vt in hist[:1] + hist[-3:]:
         hl.append((f"  #{i:<3} {str(o):16s} shift {vf}  -> {('shift ' + str(vt)) if vt else 'CURRENT'}", GRN if vt is None else DIM))
     segs.append(("still", slide("The shared memory: learn once, update when the bench changes",
-                 [("notes the next shift read before starting:", DIM)] + brief + [("", FG), ("the blue rack moved at shift 3. Memory of its position:", DIM)] + hl +
+                 [("notes written after shift 1, read by every later shift:", DIM)] + brief + [("", FG), ("the blue rack moved at shift 3. Memory of its position:", DIM)] + hl +
                  [("", FG), ("old position handed to an agent after the move: never", GRN)],
-                 image=ver_frame(frames, 3), img_caption="shift 3: rack moved, tube placed correctly", footer="brain/ledger.py · Temporal Validity (2606.26511) · Zep (2501.13956) · ACE (2510.04618)"),
-        "After every shift, notes go into a shared memory. Shift two read the gripper lesson and succeeded. "
-        "At shift three the rack moved, and the memory replaced the old position. Nothing is deleted; the old fact just stops being used."))
+                 image=ver_frame(frames, 3), img_caption="shift 3: the rack moved; memory updated the same shift", footer="brain/ledger.py · Temporal Validity (2606.26511) · Zep (2501.13956) · ACE (2510.04618)"),
+        "After every shift, notes go into a shared memory: the gripper quirk, the rack positions, the lessons. "
+        "At shift three the rack moved, and the memory replaced the old position the same shift. Nothing is deleted; the old fact just stops being used."))
 
     # 6. results + improvement
     segs.append(("still", slide("Measured, and self-improving", [
         ("4 shifts with memory vs 4 without, same starting conditions", DIM),
-        ("  tubes placed correctly in 3 of 4 shifts either way; every false 'done' was caught", FG),
-        ("  the checker itself was right 75% of the time, measured against the simulator", FG), ("", FG),
+        ("  tubes placed correctly in 1 of 4 shifts either way; every false 'done' was caught", FG),
+        ("  the checker itself was right 100% of the time, measured against the simulator", FG), ("", FG),
         ("The team rewrote its own playbook, then had to prove it:", DIM),
         (f"  on a shift it had never seen:  old score {pb['score_old']}   ->   new score {pb['score_new']}   kept", GRN),
         ("  old playbook: claimed done falsely       new playbook: no false claim", FG), ("", FG),
-        ("Honest caveat: memory has not yet reduced the number of moves. Details in the README.", DIM)],
+        ("Memory has not yet raised the success rate or cut the number of moves. Details in the README.", DIM)],
         footer="eval/report.md · eval/playbook_v1.json · eval/brain_final.json"),
-        "Everything is measured against simulator ground truth, including the verifier's own accuracy. "
+        "Everything is measured against simulator ground truth, including the checker's own accuracy, which was perfect on this run. "
         "One self-improvement cycle: the team rewrote its playbook, and the gate kept it because the new version made no false claim on an unseen shift. "
         "Caveats are in the README, with the numbers."))
 

@@ -214,7 +214,7 @@
         <img src="assets/verifier-shift1-fail.jpg" alt="Top-down photo the checker judged in shift one: the red tube is still on the bench, not on the red rack" width="512" height="512">
         <div class="body">
           <h3>Verify independently</h3>
-          <p>The checker sees only the list of checks and one top-down photo. It never sees what the operator said. In shift one the operator claimed done with nothing racked, and the checker said no.</p>
+          <p>The checker sees only the list of checks and one top-down photo. It never sees what the operator said. Three times an operator claimed done with tubes still on the bench, and the checker said no every time.</p>
           <div class="proof">team.py: verify, claim_vs_trace. Checker accuracy is measured against simulator ground truth.</div>
         </div>
       </div>
@@ -229,7 +229,7 @@
       <div class="pillar">
         <h3>Improve autonomously</h3>
         <p>After a few shifts the team rewrites its own operator playbook. The new version is kept only if it scores at least as well on a shift it has never seen.</p>
-        <div class="proof">improve.py: cycle 1 kept. Old playbook made a false claim on the held-out shift, the new one did not.</div>
+        <div class="proof">improve.py: cycle 1 kept on the cube bench. Old playbook made a false claim on the held-out shift, the new one did not.</div>
       </div>
     </div>
   </div>
@@ -241,18 +241,18 @@
     <div class="shifts">
       <div class="shift">
         <img src="assets/verifier-shift1-fail.jpg" alt="Shift one final photo: tubes still scattered" width="512" height="512">
-        <span class="tag fail">shift 1: fail</span>
-        <p>Empty memory. The gripper ignored the first close and reported nothing held. The operator lifted nothing, placed nothing, and declared the job done.</p>
+        <span class="tag fail">no memory, shift 1: fail</span>
+        <p>The gripper ignored the first close and reported nothing held. The operator lifted nothing, placed nothing, and declared the job done. The checker said no.</p>
       </div>
       <div class="shift">
         <img src="assets/verifier-shift2-pass.jpg" alt="Shift two final photo: red tube on the red rack, blue tube on the blue rack" width="512" height="512">
-        <span class="tag pass">shift 2: pass</span>
-        <p>The briefing said: close twice, check the hold before lifting. The operator did, and every check passed.</p>
+        <span class="tag pass">with memory, shift 1: pass</span>
+        <p>The operator retried the close, confirmed the hold, racked both tubes and left the control alone. Every check passed, and the curator wrote the gripper lesson.</p>
       </div>
       <div class="shift">
         <img src="assets/verifier-shift3-rack-moved.jpg" alt="Shift three final photo: the blue rack has moved and the blue tube is on it" width="512" height="512">
-        <span class="tag pass">shift 3: rack moved, pass</span>
-        <p>The blue rack was moved overnight. The memory replaced the old position after one look. No agent was handed the stale one.</p>
+        <span class="tag fail">with memory, shift 3: rack moved</span>
+        <p>The blue rack was moved overnight. The memory replaced the old position the same shift and no agent was handed the stale one. The placement itself was not finished in time.</p>
       </div>
     </div>
   </div>
@@ -267,27 +267,27 @@
         <table>
           <thead><tr><th>Metric</th><th class="num">No memory</th><th class="num">Shared memory</th></tr></thead>
           <tbody>
-            <tr><td>Tubes placed correctly</td><td class="num">3 of 4</td><td class="num">3 of 4</td></tr>
-            <tr><td>False "done" claims caught</td><td class="num">1</td><td class="num">1</td></tr>
-            <tr><td>Checker correct vs ground truth</td><td class="num">75%</td><td class="num">75%</td></tr>
-            <tr><td>Robot actions per shift</td><td class="num">34</td><td class="num">38</td></tr>
+            <tr><td>Tubes placed correctly</td><td class="num">1 of 4</td><td class="num">1 of 4</td></tr>
+            <tr><td>False "done" claims caught</td><td class="num">1 of 1</td><td class="num">2 of 2</td></tr>
+            <tr><td>Checker correct vs ground truth</td><td class="num">100%</td><td class="num">100%</td></tr>
+            <tr><td>Robot actions per shift</td><td class="num">34</td><td class="num">39</td></tr>
             <tr><td>Stale rack positions handed out</td><td class="num">n/a</td><td class="num">0</td></tr>
             <tr><td>Playbook rewrite kept on an unseen shift</td><td class="num" colspan="2">yes: old score -61.5, new score -22.5</td></tr>
           </tbody>
         </table>
-        <p class="muted" style="margin-top:14px;font-size:0.92rem">Memory has not yet reduced the number of actions. Two memory shifts accidentally ran with the new playbook, which over-checks. The README records this and the sweep now isolates the two effects.</p>
+        <p class="muted" style="margin-top:14px;font-size:0.92rem">Memory has not yet raised the success rate or cut the number of actions. The task is hard for a text operator working from camera coordinates, and the gripper quirk costs a retry every pick. What memory did do: the gripper lesson and the moved rack were recorded and never handed out stale.</p>
       </div>
       <div>
-        <h3>What the memory held after four shifts</h3>
-        <div class="ledger" style="margin-top:12px"><span class="old">#2   blue rack at [0.221, -0.168]   shift 1 to 2</span>
-<span class="old">#10  blue rack at [0.221, -0.168]   shift 2 to 3</span>
-<span class="old">#13  blue rack at [0.220, -0.089]   shift 3 to 4</span>
-<span class="cur">#15  blue rack at [0.221, -0.090]   shift 4, current</span>
+        <h3>What the memory held after four shifts (excerpt)</h3>
+        <div class="ledger" style="margin-top:12px"><span class="old">#2   blue rack at [0.212, -0.149]   shift 1 to 2</span>
+<span class="old">#8   blue rack at [0.221, -0.169]   shift 2 to 3</span>
+<span class="old">#14  blue rack at [0.220, -0.090]   shift 3 to 4   (moved)</span>
+<span class="cur">#18  blue rack at [0.223, -0.088]   shift 4, current</span>
 
-<span class="cur">#9   gripper: first close often reports nothing held;
+<span class="cur">#15  gripper: first close often reports nothing held;
      close a second time and check before lifting</span>
-<span class="cur">#4   lesson from shift 1: do not claim done without
-     a hold confirmed and a final photo</span></div>
+<span class="cur">#19  lesson from shift 4: claimed done but the checker
+     failed C2; confirm the hold before placing</span></div>
       </div>
     </div>
   </div>
