@@ -22,7 +22,7 @@ def arm(llm: Crusoe, name: str, episodes: int, seed0: int, with_brain: bool) -> 
     brain = Brain(out / "brain.sqlite") if with_brain else None
     recs = []
     for ep in range(1, episodes + 1):
-        recs.append(run_episode(llm, ep, seed0 + ep, brain, out_dir=out, log=lambda s: print(f"[{name}] {s}")))
+        recs.append(run_episode(llm, ep, seed0 + ep, brain, out_dir=out, log=lambda s: print(f"[{name}] {s}"), playbook=""))  # no learned playbook: isolate the brain effect
     if brain:
         (out / "brain_final.json").write_text(json.dumps(brain.current(), indent=1))
         (out / "served.json").write_text(json.dumps(brain.served, indent=1))

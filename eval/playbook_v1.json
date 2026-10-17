@@ -1,0 +1,41 @@
+{
+ "version": 1,
+ "rules": [
+  "Before claiming the task is complete, run the verifier for all required conditions (tube placement, patch containment, boundary non\u2011intersection, gripper state) and only claim done if every check returns true.",
+  "After each tube placement, immediately verify that the tube is fully inside its target patch (or, for the green tube, outside both patches) before moving on to the next tube.",
+  "If a placement verification fails, retry the placement up to two times; if it still fails, abort and signal an error rather than claiming success.",
+  "Check the gripper\u2019s state (empty and jaws open) once after the final tube handling, not after every move, to reduce unnecessary calls.",
+  "Skip verification steps that have already been satisfied in the current shift (e.g., re\u2011checking a tube that has not been moved since its last successful verification).",
+  "Only query the bench bounds for the green tube when it has been moved; otherwise rely on its known initial position to avoid redundant checks."
+ ],
+ "history": [
+  {
+   "version": 1,
+   "rules": [
+    "Before claiming the task is complete, run the verifier for all required conditions (tube placement, patch containment, boundary non\u2011intersection, gripper state) and only claim done if every check returns true.",
+    "After each tube placement, immediately verify that the tube is fully inside its target patch (or, for the green tube, outside both patches) before moving on to the next tube.",
+    "If a placement verification fails, retry the placement up to two times; if it still fails, abort and signal an error rather than claiming success.",
+    "Check the gripper\u2019s state (empty and jaws open) once after the final tube handling, not after every move, to reduce unnecessary calls.",
+    "Skip verification steps that have already been satisfied in the current shift (e.g., re\u2011checking a tube that has not been moved since its last successful verification).",
+    "Only query the bench bounds for the green tube when it has been moved; otherwise rely on its known initial position to avoid redundant checks."
+   ],
+   "rationale": "These rules ensure verification precedes any completion claim, eliminating false 'done' reports, and they reduce tool calls by verifying only when necessary and avoiding repeated checks. Following them would have prevented the false completion in shift\u202f2 and streamlined the successful shifts.",
+   "seed": 500,
+   "score_old": -61.5,
+   "score_new": -22.5,
+   "kept": true,
+   "old": {
+    "success": false,
+    "false_done": true,
+    "tool_calls": 23,
+    "replans": 0
+   },
+   "new": {
+    "success": false,
+    "false_done": false,
+    "tool_calls": 45,
+    "replans": 0
+   }
+  }
+ ]
+}
