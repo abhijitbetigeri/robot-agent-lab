@@ -1,0 +1,31 @@
+# OpenShell network policy for the OPERATOR sandbox.
+# The operator is the only agent that executes generated motion code, so it is the only one sandboxed.
+# Everything it needs is one endpoint. Anything else is denied and logged.
+#
+# Install (needs Node >= 22.19 and Docker Desktop running):
+#   curl -fsSL https://www.nvidia.com/nemoclaw.sh | bash
+#   nemoclaw onboard            # provider: "Other OpenAI-compatible endpoint"
+#                               #   URL   https://api.inference.crusoecloud.com/v1
+#                               #   model nvidia/Nemotron-3.5-Lightning-30B-A3B
+#                               #   key   $CRUSOE_API_KEY  (stays on the host; injected at runtime)
+#   nemoclaw operator status
+#
+# Demo: from inside the sandbox, `curl -m 3 https://example.com` -> denied; `nemoclaw operator audit` shows the attempt.
+name: night-shift-operator
+network:
+  default: deny
+  allow:
+    - host: api.inference.crusoecloud.com
+      port: 443
+      protocol: https
+filesystem:
+  readonly:
+    - /workspace/sim          # the bench model is read-only to the operator
+  readwrite:
+    - /workspace/runs
+process:
+  max_processes: 32
+inference:
+  provider: openai-compatible
+  base_url: https://api.inference.crusoecloud.com/v1
+  model: nvidia/Nemotron-3.5-Lightning-30B-A3B
