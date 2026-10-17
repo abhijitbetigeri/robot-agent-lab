@@ -1,0 +1,324 @@
+<title>Robot Agent Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: a lab notebook read left to right. Split hero, one full-width film, a diagram, proof in frames, numbers last. */
+  :root {
+    --bg: #f7f8fa;
+    --bg-2: #eef1f6;
+    --fg: #1c1f26;
+    --fg-2: #5b6170;
+    --line: #d9dde6;
+    --accent: #2451d6;
+    --accent-ink: #ffffff;
+    --ok: #1c8c4c;
+    --bad: #cc3434;
+    --font-display: "Geist", "Helvetica Neue", Arial, sans-serif;
+    --font-body: "Geist", "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "Geist Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12141a; --bg-2: #1a1d25; --fg: #eceef3; --fg-2: #a4aab8; --line: #2b303c;
+      --accent: #7a9bff; --accent-ink: #0d1120; --ok: #58c98a; --bad: #ff7b7b; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12141a; --bg-2: #1a1d25; --fg: #eceef3; --fg-2: #a4aab8; --line: #2b303c;
+    --accent: #7a9bff; --accent-ink: #0d1120; --ok: #58c98a; --bad: #ff7b7b; color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 17px; line-height: 1.55; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  img, video { max-width: 100%; height: auto; display: block; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; letter-spacing: -0.02em; }
+  h1 { font-size: clamp(2rem, 4.6vw, 3.4rem); line-height: 1.05; font-weight: 700; }
+  h2 { font-size: clamp(1.5rem, 2.6vw, 2.1rem); line-height: 1.15; font-weight: 600; }
+  h3 { font-size: 1.1rem; font-weight: 600; }
+  p { margin: 0; max-width: 62ch; }
+  .muted { color: var(--fg-2); }
+  .mono { font-family: var(--font-mono); font-size: 0.92em; }
+  section { padding-block: 72px; border-top: 1px solid var(--line); }
+  section:first-of-type { border-top: 0; }
+
+  /* nav */
+  nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+  nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 16px; }
+  nav .brand { font-weight: 600; font-family: var(--font-display); color: var(--fg); }
+  nav ul { display: flex; gap: 22px; list-style: none; margin: 0; padding: 0; }
+  nav li a { color: var(--fg-2); font-size: 0.95rem; }
+  nav li a:hover { color: var(--fg); text-decoration: none; }
+  @media (max-width: 720px) { nav ul li:not(:last-child) { display: none; } }
+
+  /* hero */
+  .hero { padding-block: 56px 72px; }
+  .hero .grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 48px; align-items: center; }
+  .hero .copy { display: grid; gap: 22px; min-width: 0; }
+  .hero p.lede { font-size: 1.15rem; color: var(--fg-2); max-width: 44ch; }
+  .ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn { display: inline-flex; align-items: center; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 0.98rem; border: 1px solid transparent; white-space: nowrap; transition: transform .15s ease; }
+  .btn:active { transform: translateY(1px); }
+  .btn:hover { text-decoration: none; }
+  .btn-primary { background: var(--accent); color: var(--accent-ink); }
+  .btn-secondary { border-color: var(--line); color: var(--fg); background: var(--bg-2); }
+  .hero figure { margin: 0; min-width: 0; }
+  .hero figure img { border-radius: 10px; border: 1px solid var(--line); }
+  .hero figcaption { margin-top: 10px; font-size: 0.9rem; color: var(--fg-2); }
+  @media (max-width: 860px) { .hero .grid { grid-template-columns: 1fr; } }
+
+  /* problem */
+  .problem { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+  .problem .rules { display: grid; gap: 10px; margin-top: 18px; font-family: var(--font-mono); font-size: 0.95rem; }
+  .problem .rules span { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 10px; vertical-align: -1px; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; min-width: 0; }
+  .pair figure { margin: 0; min-width: 0; }
+  .pair img { border-radius: 8px; border: 1px solid var(--line); }
+  .pair figcaption { font-size: 0.85rem; color: var(--fg-2); margin-top: 6px; }
+  @media (max-width: 860px) { .problem { grid-template-columns: 1fr; } }
+
+  /* demo */
+  .demo video { width: 100%; border-radius: 10px; border: 1px solid var(--line); background: var(--bg-2); }
+  .demo .note { margin-top: 12px; font-size: 0.92rem; }
+
+  /* how */
+  .how .diagram { margin: 28px 0 40px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #f7f8fa; }
+  .pillars { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .pillar { border: 1px solid var(--line); border-radius: 10px; padding: 22px; display: grid; gap: 10px; min-width: 0; background: var(--bg-2); }
+  .pillar.framed { padding: 0; overflow: hidden; }
+  .pillar.framed img { aspect-ratio: 16/9; object-fit: cover; width: 100%; }
+  .pillar.framed .body { padding: 18px 22px 22px; display: grid; gap: 10px; }
+  .pillar .proof { font-family: var(--font-mono); font-size: 0.85rem; color: var(--fg-2); }
+  @media (max-width: 760px) { .pillars { grid-template-columns: 1fr; } }
+
+  /* shifts gallery */
+  .shifts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 28px; }
+  .shift { min-width: 0; }
+  .shift img { border-radius: 8px; border: 1px solid var(--line); aspect-ratio: 1; object-fit: cover; width: 100%; }
+  .shift .tag { display: inline-block; font-family: var(--font-mono); font-size: 0.8rem; padding: 3px 8px; border-radius: 6px; margin: 12px 0 6px; }
+  .tag.fail { background: color-mix(in srgb, var(--bad) 14%, transparent); color: var(--bad); }
+  .tag.pass { background: color-mix(in srgb, var(--ok) 14%, transparent); color: var(--ok); }
+  .shift p { font-size: 0.95rem; }
+  @media (max-width: 760px) { .shifts { grid-template-columns: 1fr; } }
+
+  /* results */
+  .results .grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; align-items: start; margin-top: 28px; }
+  .tablewrap { overflow-x: auto; min-width: 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.95rem; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-weight: 600; color: var(--fg-2); font-size: 0.85rem; }
+  td.num, th.num { text-align: right; font-family: var(--font-mono); }
+  .ledger { font-family: var(--font-mono); font-size: 0.85rem; background: var(--bg-2); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; overflow-x: auto; white-space: pre; line-height: 1.6; }
+  .ledger .cur { color: var(--ok); }
+  .ledger .old { color: var(--fg-2); }
+  @media (max-width: 860px) { .results .grid { grid-template-columns: 1fr; } }
+
+  /* stack + papers */
+  .stack { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 24px; }
+  .stack div { border-top: 2px solid var(--accent); padding-top: 12px; min-width: 0; }
+  .stack h3 { font-size: 1rem; }
+  .stack p { font-size: 0.92rem; color: var(--fg-2); }
+  @media (max-width: 760px) { .stack { grid-template-columns: 1fr 1fr; } }
+  .papers { columns: 2; column-gap: 40px; margin-top: 20px; font-size: 0.95rem; }
+  .papers div { break-inside: avoid; padding: 8px 0; border-bottom: 1px solid var(--line); }
+  .papers .mono { color: var(--fg-2); }
+  @media (max-width: 760px) { .papers { columns: 1; } }
+  footer { padding-block: 40px; border-top: 1px solid var(--line); color: var(--fg-2); font-size: 0.92rem; }
+  footer p { max-width: 80ch; }
+  @media (prefers-reduced-motion: reduce) { .btn { transition: none; } }
+</style>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#top">Robot Agent Lab</a>
+    <ul>
+      <li><a href="#demo">Demo</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#results">Results</a></li>
+      <li><a href="https://github.com/abhijitbetigeri/robot-agent-lab">GitHub</a></li>
+    </ul>
+  </div>
+</nav>
+
+<section class="hero" id="top">
+  <div class="wrap grid">
+    <div class="copy">
+      <h1>A lab's night shift, run by agents you can walk away from.</h1>
+      <p class="lede">One typed line. A team of Nemotron agents sorts the samples on a simulated robot arm, checks its own work, and remembers across shifts.</p>
+      <div class="ctas">
+        <a class="btn btn-primary" href="#demo">Watch the demo</a>
+        <a class="btn btn-secondary" href="https://github.com/abhijitbetigeri/robot-agent-lab">View on GitHub</a>
+      </div>
+    </div>
+    <figure>
+      <img src="assets/bench-hero.jpg" alt="Simulated lab bench: an SO-101 robot arm, three coloured sample tubes and two rack patches" width="1280" height="800">
+      <figcaption>The bench at the start of a shift. MuJoCo, SO-101 arm, three tubes, two racks.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <div class="wrap problem">
+    <div>
+      <h2>The problem</h2>
+      <p class="muted" style="margin-top:14px">Sample tubes arrive all day with coloured caps. Before the night runs, every tube has to be in the right place. A technician does this twice a night. A tube in the wrong rack ruins a run that costs more than the robot.</p>
+      <div class="rules">
+        <div><span style="background:#cc3434"></span>red cap goes to the cold rack</div>
+        <div><span style="background:#2451d6"></span>blue cap goes to the sequencer rack</div>
+        <div><span style="background:#1c8c4c"></span>green cap is a control and must stay on the bench</div>
+      </div>
+      <p class="muted" style="margin-top:18px">The human types "Put tonight's samples where they belong." and leaves. Everything after that is the agents' problem.</p>
+    </div>
+    <div class="pair">
+      <figure><img src="assets/bench-hero.jpg" alt="Bench before the shift: tubes scattered on the bench" width="1280" height="800"><figcaption>Start of shift</figcaption></figure>
+      <figure><img src="assets/bench-done.jpg" alt="Bench after the shift: red tube on the red rack, blue tube on the blue rack, green tube untouched" width="1280" height="800"><figcaption>Done, as the checker must confirm it</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section class="demo" id="demo">
+  <div class="wrap">
+    <h2>Two minutes: the use case, the architecture, and the simulation running</h2>
+    <p class="muted" style="margin:12px 0 24px">The middle section is the real simulator replaying shift two from the agent's own tool calls, including the sticky gripper and the retry.</p>
+    <video controls preload="metadata" poster="assets/sim-replay.png" playsinline>
+      <source src="assets/demo.mp4" type="video/mp4">
+    </video>
+    <p class="note muted">Narrated. Every frame and number in it comes from the recorded runs in the repository.</p>
+  </div>
+</section>
+
+<section class="how" id="how">
+  <div class="wrap">
+    <h2>How it works</h2>
+    <p class="muted" style="margin-top:12px">Five agents, one loop. A planner writes the definition of done. An operator drives the arm. A checker that never talks to the operator judges one photo. A monitor decides when to stop. A curator writes the shift into shared memory.</p>
+    <div class="diagram"><img src="assets/architecture.png" alt="Architecture diagram: human goal to planner, planner to operator, operator to simulated bench, bench photo to sealed verifier, verdicts to monitor, shared brain feeding briefings, improver rewriting the playbook" width="1280" height="720"></div>
+
+    <div class="pillars">
+      <div class="pillar">
+        <h3>Collaborate through shared memory</h3>
+        <p>Every shift reads a ledger of facts, procedures and lessons before it starts. A new value for the same fact replaces the old one and keeps its history. Nothing is deleted.</p>
+        <div class="proof">brain/ledger.py: subject, relation, object, valid_from, valid_to, provenance</div>
+      </div>
+      <div class="pillar framed">
+        <img src="assets/verifier-shift1-fail.jpg" alt="Top-down photo the checker judged in shift one: the red tube is still on the bench, not on the red rack" width="512" height="512">
+        <div class="body">
+          <h3>Verify independently</h3>
+          <p>The checker sees only the list of checks and one top-down photo. It never sees what the operator said. In shift one the operator claimed done with nothing racked, and the checker said no.</p>
+          <div class="proof">team.py: verify, claim_vs_trace. Checker accuracy is measured against simulator ground truth.</div>
+        </div>
+      </div>
+      <div class="pillar framed">
+        <img src="assets/sim-replay.png" alt="The simulation replay with the agent's tool calls listed beside the arm" width="1280" height="720">
+        <div class="body">
+          <h3>Detect failures</h3>
+          <p>A rule-based monitor watches the tool log for repeated actions, observe-only stalls, collapsing progress estimates, exhausted budgets and a dead camera. It decides: continue, re-plan, stop, or ping a human.</p>
+          <div class="proof">team.py: Monitor. The one ping of the night is a real camera failure.</div>
+        </div>
+      </div>
+      <div class="pillar">
+        <h3>Improve autonomously</h3>
+        <p>After a few shifts the team rewrites its own operator playbook. The new version is kept only if it scores at least as well on a shift it has never seen.</p>
+        <div class="proof">improve.py: cycle 1 kept. Old playbook made a false claim on the held-out shift, the new one did not.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Three shifts, as the checker saw them</h2>
+    <div class="shifts">
+      <div class="shift">
+        <img src="assets/verifier-shift1-fail.jpg" alt="Shift one final photo: tubes still scattered" width="512" height="512">
+        <span class="tag fail">shift 1: fail</span>
+        <p>Empty memory. The gripper ignored the first close and reported nothing held. The operator lifted nothing, placed nothing, and declared the job done.</p>
+      </div>
+      <div class="shift">
+        <img src="assets/verifier-shift2-pass.jpg" alt="Shift two final photo: red tube on the red rack, blue tube on the blue rack" width="512" height="512">
+        <span class="tag pass">shift 2: pass</span>
+        <p>The briefing said: close twice, check the hold before lifting. The operator did, and every check passed.</p>
+      </div>
+      <div class="shift">
+        <img src="assets/verifier-shift3-rack-moved.jpg" alt="Shift three final photo: the blue rack has moved and the blue tube is on it" width="512" height="512">
+        <span class="tag pass">shift 3: rack moved, pass</span>
+        <p>The blue rack was moved overnight. The memory replaced the old position after one look. No agent was handed the stale one.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="results" id="results">
+  <div class="wrap">
+    <h2>Results from the recorded runs</h2>
+    <p class="muted" style="margin-top:12px">Four shifts with memory and four without, same starting positions, same models, same prompts. Everything scored against the simulator's ground truth.</p>
+    <div class="grid">
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Metric</th><th class="num">No memory</th><th class="num">Shared memory</th></tr></thead>
+          <tbody>
+            <tr><td>Tubes placed correctly</td><td class="num">3 of 4</td><td class="num">3 of 4</td></tr>
+            <tr><td>False "done" claims caught</td><td class="num">1</td><td class="num">1</td></tr>
+            <tr><td>Checker correct vs ground truth</td><td class="num">75%</td><td class="num">75%</td></tr>
+            <tr><td>Robot actions per shift</td><td class="num">34</td><td class="num">38</td></tr>
+            <tr><td>Stale rack positions handed out</td><td class="num">n/a</td><td class="num">0</td></tr>
+            <tr><td>Playbook rewrite kept on an unseen shift</td><td class="num" colspan="2">yes: old score -61.5, new score -22.5</td></tr>
+          </tbody>
+        </table>
+        <p class="muted" style="margin-top:14px;font-size:0.92rem">Memory has not yet reduced the number of actions. Two memory shifts accidentally ran with the new playbook, which over-checks. The README records this and the sweep now isolates the two effects.</p>
+      </div>
+      <div>
+        <h3>What the memory held after four shifts</h3>
+        <div class="ledger" style="margin-top:12px"><span class="old">#2   blue rack at [0.221, -0.168]   shift 1 to 2</span>
+<span class="old">#10  blue rack at [0.221, -0.168]   shift 2 to 3</span>
+<span class="old">#13  blue rack at [0.220, -0.089]   shift 3 to 4</span>
+<span class="cur">#15  blue rack at [0.221, -0.090]   shift 4, current</span>
+
+<span class="cur">#9   gripper: first close often reports nothing held;
+     close a second time and check before lifting</span>
+<span class="cur">#4   lesson from shift 1: do not claim done without
+     a hold confirmed and a final photo</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Built on</h2>
+    <div class="stack">
+      <div><h3>Crusoe Managed Inference</h3><p>Every model call, one endpoint. Per-role models so rate limits spread across them.</p></div>
+      <div><h3>NVIDIA Nemotron</h3><p>Super plans, Lightning operates, Nano monitors and curates, Nano Omni is the only agent that looks.</p></div>
+      <div><h3>NemoClaw and OpenShell</h3><p>The operator is the one agent that executes generated motion, so it runs in a sandbox that can reach one host.</p></div>
+      <div><h3>You.com</h3><p>A researcher tool the planner can call when a tool error is outside the protocol. Results enter memory with a source and a date.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Papers we implemented, not just cited</h2>
+    <div class="papers">
+      <div>Delta-only memory writes <span class="mono">ACE, 2510.04618</span></div>
+      <div>Deterministic supersession with validity windows <span class="mono">Temporal Validity in Retrieval Memory, 2606.26511</span></div>
+      <div>Bi-temporal fact rows <span class="mono">Zep, 2501.13956</span></div>
+      <div>Facts, procedures and insights as tiers <span class="mono">G-Memory, 2506.07398</span></div>
+      <div>A checker that never sees the worker <span class="mono">Self-Authored Verification Is Unreliable, 2607.24300</span></div>
+      <div>Done claims diffed against the tool log <span class="mono">OverclaimBench, 2609.20812</span></div>
+      <div>Progress intervals and an infeasible flag <span class="mono">BAGEN, 2606.00198</span></div>
+      <div>Same action, same observation, twice, is a loop <span class="mono">DeLoop, 2610.19376</span></div>
+      <div>Self-edits kept only on held-out data <span class="mono">Darwin Gödel Machine, 2505.22954</span></div>
+      <div>Fixed model and prompts across arms <span class="mono">MemDelta, 2606.29914</span></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>Built on October 17, 2026 at the Recursive Agents Hackathon by Crusoe and Cerebral Valley. All code was written that day. The idea that stale memories should lose at retrieval time rather than be deleted comes from two earlier projects by the same author; no code from them is used. The SO-101 model is from MuJoCo Menagerie under the Apache-2.0 licence. No physical hardware was used.</p>
+    <p style="margin-top:12px"><a href="https://github.com/abhijitbetigeri/robot-agent-lab">github.com/abhijitbetigeri/robot-agent-lab</a></p>
+  </div>
+</footer>

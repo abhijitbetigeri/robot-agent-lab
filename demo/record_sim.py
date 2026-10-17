@@ -21,7 +21,7 @@ from sim.env import LabEnv, Gotchas  # noqa: E402
 ROOT = Path(__file__).resolve().parents[1]
 W, H = 1280, 720
 VW, VH = 880, 495
-BG, FG, DIM, ACC, RED, GRN = (16, 18, 24), (235, 235, 235), (150, 155, 165), (255, 200, 60), (255, 95, 95), (110, 220, 130)
+BG, FG, DIM, ACC, RED, GRN = (247, 248, 250), (28, 31, 38), (110, 116, 128), (36, 81, 214), (204, 52, 52), (28, 140, 76)
 MONO, SANS = "/System/Library/Fonts/Menlo.ttc", "/System/Library/Fonts/Helvetica.ttc"
 
 
@@ -52,7 +52,7 @@ def short(name: str, args: dict, res: dict | None) -> tuple[str, tuple]:
     color = FG
     if res is not None:
         if "holding" in res:
-            s += f"  → holding={res['holding']}"
+            s += "  → " + {None: "nothing held", True: "tube held", False: "empty"}.get(res["holding"], str(res["holding"]))
             color = RED if res["holding"] is None else (GRN if res["holding"] else FG)
         elif name == "look":
             s += f"  → {len(res.get('tubes', []))} tubes, {len(res.get('racks', []))} racks"
@@ -90,15 +90,15 @@ class Recorder:
         im.paste(view, (24, 70))
         d = ImageDraw.Draw(im)
         d.rectangle([22, 68, 26 + VW, 72 + VH], outline=DIM, width=2)
-        d.text((24, 20), f"Robot Agent Lab — shift {self.shift}, replayed from the operator's real tool calls", fill=ACC, font=self.f_title)
-        d.text((24, 580), "Operator: Nemotron 3.5 Lightning on Crusoe · one tool call per turn · perception = top-down camera", fill=DIM, font=self.f_small)
-        d.text((24, 606), "Sticky gripper quirk is ON: the first close reports holding=null and does not grip", fill=DIM, font=self.f_small)
+        d.text((24, 20), f"Robot Agent Lab: shift {self.shift}, the robot replaying exactly what the agent told it to do", fill=ACC, font=self.f_title)
+        d.text((24, 580), "The agent driving the arm: Nemotron 3.5 Lightning on Crusoe. It sees the bench through a top-down camera.", fill=DIM, font=self.f_small)
+        d.text((24, 606), "Bench quirk switched on: the gripper ignores the first close command and reports nothing held.", fill=DIM, font=self.f_small)
         if self.banner:
-            d.rectangle([24, 640, 24 + VW, 700], fill=(30, 34, 46))
+            d.rectangle([24, 640, 24 + VW, 700], fill=(232, 237, 250))
             d.text((36, 652), self.banner, fill=ACC, font=self.f_title)
         # tool log panel
         x0 = 24 + VW + 24
-        d.text((x0, 70), "tool calls", fill=DIM, font=self.f_small)
+        d.text((x0, 70), "what the agent told the robot to do", fill=DIM, font=self.f_small)
         y = 100
         for s, c in self.log[-20:]:
             d.text((x0, y), s, fill=c, font=self.f_mono)
@@ -151,7 +151,7 @@ def main():
     for name, args, res in calls:
         rec.current, _ = short(name, args, None)
         if name == "claim_done":
-            rec.banner = "Operator claims done, citing tool-call evidence per check"
+            rec.banner = "The agent declares the job done and cites which actions prove each check"
             rec.log.append(short(name, args, res))
             rec.current = ""
             rec.emit(hold=a.fps * 2)
@@ -167,16 +167,16 @@ def main():
         s, c = short(name, args, live if name == "look" else res)
         rec.log.append((s, c))
         if res.get("holding") is None and name == "gripper" and args.get("cmd") == "close":
-            rec.banner = "holding = null: the sticky gripper did not grip. The operator must notice and retry."
+            rec.banner = "Nothing held. The sticky gripper did not grip. Will the agent notice?"
             rec.emit(hold=a.fps)
         elif res.get("holding") is True and name == "gripper":
-            rec.banner = "Second close: holding = true. Now it can lift."
+            rec.banner = "It closed again. Now the tube is held, so it can lift."
             rec.emit(hold=a.fps // 2)
         elif name == "look":
-            rec.banner = "look(): colour detector on the top-down camera → tube and rack coordinates"
+            rec.banner = "look(): the camera finds the tubes and racks and returns their positions"
             rec.emit(hold=a.fps // 2)
         rec.current = ""
-    rec.banner = "Sealed verifier (Nemotron Nano Omni) judges the final photo: all checks PASS"
+    rec.banner = "Independent checker (Nemotron Nano Omni) judges the final photo: all checks pass"
     rec.emit(hold=a.fps * 3)
     rec.close()
     print(f"wrote {a.out}: {rec.frames} frames = {rec.frames / a.fps:.1f}s")

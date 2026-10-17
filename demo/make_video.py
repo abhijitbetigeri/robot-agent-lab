@@ -22,7 +22,7 @@ sys.path.insert(0, str(ROOT))
 OUT = ROOT / "demo" / "build"
 OUT.mkdir(parents=True, exist_ok=True)
 W, H = 1280, 720
-BG, FG, DIM, ACC, RED, GRN, BLU = (16, 18, 24), (235, 235, 235), (150, 155, 165), (255, 200, 60), (255, 95, 95), (110, 220, 130), (120, 170, 255)
+BG, FG, DIM, ACC, RED, GRN, BLU = (247, 248, 250), (28, 31, 38), (110, 116, 128), (36, 81, 214), (204, 52, 52), (28, 140, 76), (36, 81, 214)
 MONO, SANS = "/System/Library/Fonts/Menlo.ttc", "/System/Library/Fonts/Helvetica.ttc"
 VOICE, RATE = "Samantha", 180
 
@@ -88,7 +88,7 @@ def architecture() -> Image.Image:
     d.text((48, 36), "How it works", fill=ACC, font=font(SANS, 40))
     ft, fs = font(SANS, 22), font(SANS, 17)
 
-    def box(x, y, w, h, title, sub, color=FG, fill=(28, 32, 44)):
+    def box(x, y, w, h, title, sub, color=FG, fill=(255, 255, 255)):
         d.rounded_rectangle([x, y, x + w, y + h], radius=10, fill=fill, outline=color, width=2)
         d.text((x + 14, y + 10), title, fill=color, font=ft)
         yy = y + 40
@@ -111,12 +111,12 @@ def architecture() -> Image.Image:
     box(760, 265, 470, 115, "Simulated bench  (MuJoCo, SO-101)", ["tubes, racks, two cameras", "quirks: sticky gripper, rack moves, camera nudge", "ground truth -> eval only"], FG)
     box(760, 435, 470, 110, "Verifier  (Nemotron Nano Omni)  SEALED", ["sees only the checks + one top-down photo,", "never the operator; 3 votes", "accuracy measured vs ground truth"], GRN)
     box(370, 435, 300, 110, "Monitor  (rules + Nano)", ["loop / stall / progress collapse /", "budget / camera down ->", "continue | replan | stop | ping"], RED)
-    box(48, 595, 620, 110, "Shared Brain  (SQLite ledger)", ["(subject, relation, object) + valid_from/valid_to + provenance", "same key, new value -> old row superseded, never deleted", "read before every shift; Curator (Nano) writes deltas after"], BLU, fill=(22, 30, 48))
+    box(48, 595, 620, 110, "Shared Brain  (SQLite ledger)", ["(subject, relation, object) + valid_from/valid_to + provenance", "same key, new value -> old row superseded, never deleted", "read before every shift; Curator (Nano) writes deltas after"], BLU, fill=(236, 241, 252))
     box(760, 595, 470, 110, "Improver  (Version N+1)", ["rewrites the operator playbook from shift history", "kept ONLY if it scores >= on a held-out seed", "the team has never run"], ACC)
     arrow(298, 155, 370, 155, DIM); d.text((306, 128), "goal", fill=DIM, font=fs)
     arrow(520, 210, 520, 265, DIM); d.text((530, 228), "definition of done", fill=DIM, font=fs)
-    arrow(670, 300, 760, 300, DIM); d.text((676, 276), "tool calls", fill=DIM, font=fs)
-    arrow(760, 352, 670, 352, DIM); d.text((668, 358), "observations", fill=DIM, font=fs)
+    arrow(670, 300, 760, 300, DIM); d.text((678, 244), "tool calls", fill=DIM, font=fs)
+    arrow(760, 368, 670, 368, DIM); d.text((668, 384), "observations", fill=DIM, font=fs)
     arrow(995, 380, 995, 435, DIM); d.text((1005, 398), "one photo", fill=DIM, font=fs)
     arrow(520, 380, 520, 435, DIM); d.text((530, 398), "tool log", fill=DIM, font=fs)
     arrow(760, 490, 670, 490, GRN); d.text((690, 500), "verdicts", fill=GRN, font=fs)
@@ -149,7 +149,8 @@ def log_lines(path: Path, shift: int, wanted: tuple[str, ...], limit: int = 9):
             except Exception:  # noqa: BLE001
                 r = {}
             a = re.sub(r'[{}"]', "", args).replace("cmd:", "")
-            txt2 = f"[{n:>2}] {tool}({a})  ->  holding={r.get('holding')}" if "holding" in r else f"[{n:>2}] {tool}({a})"
+            held = {None: "nothing held", True: "tube held", False: "empty"}.get(r.get("holding"), "")
+            txt2 = f"[{n:>2}] {tool}({a})  ->  {held}" if "holding" in r else f"[{n:>2}] {tool}({a})"
             color = RED if r.get("holding") is None and tool == "gripper" and "close" in a else (GRN if r.get("holding") else FG)
             out.append((txt2[:58], color))
         if len(out) >= limit:
@@ -207,7 +208,7 @@ def main():
         ("   red cap  -> cold rack", RED), ("   blue cap -> sequencer rack", BLU), ("   green cap = control, must stay on the bench", GRN), ("", FG),
         ("Today a technician does this twice a night.", FG),
         ("A tube in the wrong rack ruins a run that costs more than the robot.", FG), ("", FG),
-        ("Can a team of agents run the night shift with nobody watching?", ACC)], mono=False, image=bench_picture(), img_w=600,
+        ("Can a team of AI agents run that night shift with nobody watching?", ACC)], mono=False, image=bench_picture(), img_w=600,
         img_caption="the simulated bench (MuJoCo, SO-101 arm)", footer="Recursive Agents Hackathon · Crusoe x Cerebral Valley · Oct 17 2026"),
         "Robot Agent Lab. The problem: a small biology lab. Sample tubes arrive all day with coloured caps. Before the night runs, "
         "red caps go to the cold rack, blue caps to the sequencer rack, and the green control stays on the bench. "
@@ -231,35 +232,35 @@ def main():
 
     # 4. why the verifier exists: shift 1 false done
     l1 = log_lines(log, 1, ("gripper", "] lift"), limit=8)
-    segs.append(("still", slide("Shift 1, no memory yet — why the verifier exists", [("operator tool log (real):", DIM)] + l1 +
-                 [("", FG), ("operator: claim_done", ACC), ("Verifier: C1 FAIL", RED), ("  red tube is not inside the red patch", RED)],
-                 image=frames / "ep01_ver_038.jpg", img_caption="what the sealed verifier saw", footer="runs/sweep_brain.log, shift 1"),
-        "Shift one, with an empty brain. The gripper reports a null hold, the operator lifts nothing, places nothing, and claims done anyway. "
-        "The sealed verifier looks at the photo and fails it. Agents overclaim. That is why verification is independent."))
+    segs.append(("still", slide("Shift 1: the robot says it is done. It is not.", [("what the robot actually did (real log):", DIM)] + l1 +
+                 [("", FG), ("robot: \"done\"", ACC), ("independent checker: FAIL", RED), ("  the red tube is not in the red rack", RED)],
+                 image=frames / "ep01_ver_038.jpg", img_caption="the photo the checker judged from", footer="runs/sweep_brain.log, shift 1"),
+        "Shift one, with empty memory. The gripper reports nothing held. The robot lifts nothing, places nothing, and says it is done anyway. "
+        "An independent checker that only sees the photo says no. Agents overclaim. That is why the check is independent."))
 
     # 5. the brain learns and supersedes
     hist = db.execute("select id,object,valid_from,valid_to from facts where subject='bin_blue' and relation='position_xy' order by id").fetchall()
     rows = db.execute("select tier,subject,relation,object from facts where valid_from<=2 and (valid_to is null or valid_to>2) and tier<>'fact' order by id").fetchall()
     brief = [(f"[{t[0]}] {s} {r}: {str(o)}"[:58], ACC) for t, s, r, o in rows[:3]]
-    hl = [("bin_blue position_xy     valid_from -> valid_to", DIM)]
+    hl = [("blue rack position      valid from -> until", DIM)]
     for i, o, vf, vt in hist[:1] + hist[-3:]:
         hl.append((f"  #{i:<3} {str(o):16s} shift {vf}  -> {('shift ' + str(vt)) if vt else 'CURRENT'}", GRN if vt is None else DIM))
-    segs.append(("still", slide("The shared brain: learn once, supersede when the world changes",
-                 [("what shift 2 read before starting:", DIM)] + brief + [("", FG), ("at shift 3 the blue rack moved:", DIM)] + hl +
-                 [("", FG), ("stale positions served after the move: 0", GRN)],
-                 image=frames / "ep03_ver_035.jpg", img_caption="shift 3: rack moved, tube still racked", footer="brain/ledger.py · Temporal Validity (2606.26511) · Zep (2501.13956) · ACE (2510.04618)"),
-        "The curator writes each shift into the shared brain. Shift two read the gripper lesson and succeeded. "
-        "At shift three the rack moved; the brain superseded the old position. Nothing deleted, the old fact just loses. Zero stale positions served."))
+    segs.append(("still", slide("The shared memory: learn once, update when the bench changes",
+                 [("notes the next shift read before starting:", DIM)] + brief + [("", FG), ("the blue rack moved at shift 3. Memory of its position:", DIM)] + hl +
+                 [("", FG), ("old position handed to an agent after the move: never", GRN)],
+                 image=frames / "ep03_ver_035.jpg", img_caption="shift 3: rack moved, tube placed correctly", footer="brain/ledger.py · Temporal Validity (2606.26511) · Zep (2501.13956) · ACE (2510.04618)"),
+        "After every shift, notes go into a shared memory. Shift two read the gripper lesson and succeeded. "
+        "At shift three the rack moved, and the memory replaced the old position. Nothing is deleted; the old fact just stops being used."))
 
     # 6. results + improvement
     segs.append(("still", slide("Measured, and self-improving", [
-        ("4 shifts per arm, same seeds, same models, same prompts", DIM),
-        ("  tubes racked 3 of 4 in both arms; false 'done' claims caught by the verifier", FG),
-        ("  verifier accuracy measured against sim ground truth: 75%", FG), ("", FG),
-        ("Version N+1: the team rewrote its own operator playbook", DIM),
-        (f"  held-out seed {pb['seed']}:  old score {pb['score_old']}   ->   new score {pb['score_new']}   KEPT", GRN),
-        ("  old team: false done = yes          new team: false done = no", FG), ("", FG),
-        ("Honest caveat: the brain did not yet cut tool calls; the playbook leaked into two brain shifts. Noted in the README.", DIM)],
+        ("4 shifts with memory vs 4 without, same starting conditions", DIM),
+        ("  tubes placed correctly in 3 of 4 shifts either way; every false 'done' was caught", FG),
+        ("  the checker itself was right 75% of the time, measured against the simulator", FG), ("", FG),
+        ("The team rewrote its own playbook, then had to prove it:", DIM),
+        (f"  on a shift it had never seen:  old score {pb['score_old']}   ->   new score {pb['score_new']}   kept", GRN),
+        ("  old playbook: claimed done falsely       new playbook: no false claim", FG), ("", FG),
+        ("Honest caveat: memory has not yet reduced the number of moves. Details in the README.", DIM)],
         footer="eval/report.md · eval/playbook_v1.json · eval/brain_final.json"),
         "Everything is measured against simulator ground truth, including the verifier's own accuracy. "
         "One self-improvement cycle: the team rewrote its playbook, and the gate kept it because the new version made no false claim on an unseen shift. "
@@ -267,7 +268,7 @@ def main():
 
     # 7. end
     segs.append(("still", slide("github.com/abhijitbetigeri/robot-agent-lab", [
-        ("Shared memory · independent verification · failure detection · autonomous improvement", FG), ("", FG),
+        ("Shared memory. Independent checking. Failure detection. Self-improvement.", FG), ("", FG),
         ("Crusoe Managed Inference  ·  NVIDIA Nemotron: Super, Lightning, Nano, Nano Omni", DIM),
         ("NemoClaw / OpenShell sandbox for the operator  ·  You.com researcher", DIM), ("", FG),
         ("All code written today. No physical hardware. SO-101 model: MuJoCo Menagerie (Apache-2.0).", DIM)], mono=False),
