@@ -136,7 +136,7 @@ def log_lines(path: Path, shift: int, wanted: tuple[str, ...], limit: int = 9):
     m = re.search(rf"=== shift {shift} .*?(?==== shift {shift + 1} |DONE|\Z)", txt, re.S)
     out = []
     for line in (m.group(0) if m else "").splitlines():
-        line = line.replace("[brain] ", "").rstrip()
+        line = re.sub(r"^\[\w+\] ", "", line).rstrip()
         if line.startswith(("DoD:", "- [", "SHARED BRAIN", "brain:", "result:", "replanned")):
             continue
         if any(w in line for w in wanted):
