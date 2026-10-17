@@ -1,6 +1,6 @@
 """Build the 1-minute voiced demo from real artifacts: sweep logs, verifier frames, ledger rows, results table.
 
-    uv run python demo/make_video.py            -> demo/night-shift-demo.mp4
+    uv run python demo/make_video.py            -> demo/robot-agent-lab-demo.mp4
 Uses macOS `say` for narration and the ffmpeg bundled with imageio-ffmpeg. No screen recording needed.
 """
 from __future__ import annotations
@@ -127,14 +127,14 @@ def main():
 
     segs = []
     # 1. title
-    segs.append((slide("Night Shift", [
+    segs.append((slide("Robot Agent Lab", [
         ("A lab's overnight sample sorting, run by a team of Nemotron agents.", FG), ("", FG),
         ("The human types one line:", DIM), ("  \"Put tonight's samples where they belong.\"", ACC), ("", FG),
         ("Then walks away.", FG), ("", FG),
         ("Planner · Operator · sealed Verifier · Monitor · Curator", DIM),
         ("Crusoe Managed Inference · NVIDIA Nemotron · simulated SO-101 arm", DIM)], mono=False,
         footer="Recursive Agents Hackathon · Crusoe x Cerebral Valley · Oct 17 2026"),
-        "Night Shift. A lab's overnight sample sorting, run by a team of Nemotron agents on Crusoe. "
+        "Robot Agent Lab. A lab's overnight sample sorting, run by a team of Nemotron agents on Crusoe. "
         "A human types one line: put tonight's samples where they belong. Then walks away."))
     # 2. shift 1: false done caught
     l1 = log_lines(log, 1, ("gripper", "] lift", "claim_done"), limit=9)
@@ -180,7 +180,7 @@ def main():
         ("Crusoe Managed Inference  ·  NVIDIA Nemotron (Super, Lightning, Nano, Nano Omni)", DIM),
         ("NemoClaw / OpenShell sandbox for the operator  ·  You.com researcher", DIM), ("", FG),
         ("All code written today. No physical hardware. SO-101 model: MuJoCo Menagerie (Apache-2.0).", DIM)], mono=False),
-        "Night Shift. Built today on Crusoe Managed Inference with Nemotron. Repo on GitHub."))
+        "Robot Agent Lab. Built today on Crusoe Managed Inference with Nemotron. Repo on GitHub."))
 
     parts = []
     total = 0.0
@@ -190,7 +190,7 @@ def main():
         parts.append(segment(ffmpeg, i, im, wav, dur))
     lst = OUT / "list.txt"
     lst.write_text("".join(f"file '{p}'\n" for p in parts))
-    final = ROOT / "demo" / "night-shift-demo.mp4"
+    final = ROOT / "demo" / "robot-agent-lab-demo.mp4"
     subprocess.run([ffmpeg, "-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", str(lst), "-c", "copy", str(final)], check=True)
     print(f"wrote {final} ({total:.1f}s)")
 

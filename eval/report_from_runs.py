@@ -23,7 +23,7 @@ def per_shift(recs: list[dict]) -> str:
 
 if __name__ == "__main__":
     nb, wb = load("no_brain"), load("brain")
-    md = ["# Night Shift — with vs without the shared brain", "",
+    md = ["# Robot Agent Lab — with vs without the shared brain", "",
           f"Same seeds, same models, same prompts (MemDelta). {len(nb)} no-brain shifts, {len(wb)} brain shifts. "
           "Gotchas: sticky gripper (every shift), blue rack moves at shift 3, operator camera nudged at shift 5.", ""]
     if nb and wb:

@@ -30,7 +30,7 @@
 - Why Nemotron? Five roles, five price points; Nano runs the sweep for cents; Omni is the only one that looks.
 
 ## 1-minute video (record with QuickTime, no voice needed, captions)
-1. (0-10s) Title card: "Night Shift — one line, then walk away." Goal typed.
+1. (0-10s) Title card: "Robot Agent Lab — one line, then walk away." Goal typed.
 2. (10-30s) No-brain shift: sticky gripper, false done, verifier FAIL with reason.
 3. (30-45s) Brain shift: briefing on screen, first-try success, verifier PASS.
 4. (45-55s) Ledger: rack row superseded, valid_to set.

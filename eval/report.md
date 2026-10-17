@@ -1,4 +1,4 @@
-# Night Shift — with vs without the shared brain
+# Robot Agent Lab — with vs without the shared brain
 
 Same seeds, same models, same prompts (MemDelta). 4 no-brain shifts, 4 brain shifts. Gotchas: sticky gripper (every shift), blue rack moves at shift 3, operator camera nudged at shift 5.
 

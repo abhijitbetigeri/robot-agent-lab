@@ -75,7 +75,7 @@ if __name__ == "__main__":
     nb = arm(llm, "no_brain", args.episodes, args.seed0, with_brain=False)
     wb = arm(llm, "brain", args.episodes, args.seed0, with_brain=True)
     stale = stale_servings(wb, Path("runs/brain"))
-    md = ["# Night Shift — with vs without the shared brain", "",
+    md = ["# Robot Agent Lab — with vs without the shared brain", "",
           f"Same seeds, same models, same prompts. {args.episodes} shifts per arm. Gotchas: sticky gripper (all shifts), "
           "blue rack moves at shift 3, operator camera nudged at shift 5.", "", table(nb, wb), "",
           f"Stale bin_blue positions served after the rack moved (brain arm): **{stale}**", "",

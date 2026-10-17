@@ -1,4 +1,4 @@
-# Night Shift — a lab's overnight shift, run by an agent team you can walk away from
+# Robot Agent Lab — a lab's overnight shift, run by an agent team you can walk away from
 
 **Recursive Agents Hackathon · Crusoe × Cerebral Valley · Oct 17, 2026 · Track: Shared Brain (with Done Means Done built in)**
 

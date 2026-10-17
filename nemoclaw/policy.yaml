@@ -11,7 +11,7 @@
 #   nemoclaw operator status
 #
 # Demo: from inside the sandbox, `curl -m 3 https://example.com` -> denied; `nemoclaw operator audit` shows the attempt.
-name: night-shift-operator
+name: robot-agent-lab-operator
 network:
   default: deny
   allow:

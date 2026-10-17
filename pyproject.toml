@@ -1,7 +1,7 @@
 [project]
 name = "robot-agent-lab"
 version = "0.1.0"
-description = "Night Shift: an agent team runs a lab's overnight sample sorting on a simulated SO-101, with a shared time-versioned brain and a sealed vision verifier. Crusoe Managed Inference + Nemotron."
+description = "Robot Agent Lab: an agent team runs a lab's overnight sample sorting on a simulated SO-101, with a shared time-versioned brain and a sealed vision verifier. Crusoe Managed Inference + Nemotron."
 requires-python = ">=3.12,<3.13"
 dependencies = [
   "mujoco>=3.3",
