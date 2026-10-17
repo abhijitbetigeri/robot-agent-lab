@@ -29,7 +29,10 @@
 - What breaks? Say it: Lightning sometimes narrates tool calls instead of emitting them; we retry with a bigger budget and log it.
 - Why Nemotron? Five roles, five price points; Nano runs the sweep for cents; Omni is the only one that looks.
 
-## 1-minute video (record with QuickTime, no voice needed, captions)
+## Video (generated, narrated): `uv run python demo/record_sim.py && uv run python demo/make_video.py`
+Order: use case -> architecture -> the simulation replaying shift 2 -> shift 1 false done -> shared brain supersession -> results -> end.
+
+## Original shot list
 1. (0-10s) Title card: "Robot Agent Lab — one line, then walk away." Goal typed.
 2. (10-30s) No-brain shift: sticky gripper, false done, verifier FAIL with reason.
 3. (30-45s) Brain shift: briefing on screen, first-try success, verifier PASS.

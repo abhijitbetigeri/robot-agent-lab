@@ -83,6 +83,8 @@ class LabEnv:
         self.base_cam_pos = self.m.cam_pos[self.m.camera("operator_cam").id].copy()
         self._close_attempts = 0
         self._gripper_cmd = "open"
+        self.on_step = None   # optional callback(env) invoked after every physics step (used by the demo recorder)
+        self._view_renderer = None
         self.reset()
 
     # ------------------------------------------------------------------ lifecycle
@@ -208,17 +210,33 @@ class LabEnv:
                 "holding": self._holding(), "gripper": self._gripper_cmd, "success": bool(success)}
 
     # ------------------------------------------------------------------ internals
+    def _step(self):
+        mujoco.mj_step(self.m, self.d)
+        if self.on_step:
+            self.on_step(self)
+
+    def render_view(self, w: int = 960, h: int = 540, lookat=(0.20, 0.0, 0.03), distance=0.62, azimuth=150.0, elevation=-32.0):
+        """Angled 'audience' camera for the demo recorder (MjvCamera, no XML change)."""
+        if self._view_renderer is None:
+            self._view_renderer = mujoco.Renderer(self.m, h, w)
+        cam = mujoco.MjvCamera()
+        cam.type = mujoco.mjtCamera.mjCAMERA_FREE
+        cam.lookat[:] = lookat
+        cam.distance, cam.azimuth, cam.elevation = distance, azimuth, elevation
+        self._view_renderer.update_scene(self.d, camera=cam)
+        return self._view_renderer.render()
+
     def _park(self) -> int:
         self.d.ctrl[self.arm_ctrl] = PARK_Q
         for steps in range(1, 601):
-            mujoco.mj_step(self.m, self.d)
+            self._step()
             if np.max(np.abs(self.d.qpos[self.arm_qpos] - PARK_Q)) < 0.01 and steps > 150:
                 break
         return steps
 
     def _settle(self, steps: int):
         for _ in range(steps):
-            mujoco.mj_step(self.m, self.d)
+            self._step()
 
     def _ik_once(self, q0: np.ndarray, target: np.ndarray, iters: int = 80, damping: float = 0.05) -> tuple[float, np.ndarray]:
         """Damped least squares. Target = world position of the closed-jaw grasp centre; finger axis (site x) points down."""
@@ -262,7 +280,7 @@ class LabEnv:
         self.d.ctrl[self.arm_ctrl] = q
         steps = 0
         for steps in range(1, max_steps + 1):
-            mujoco.mj_step(self.m, self.d)
+            self._step()
             if np.max(np.abs(self.d.qpos[self.arm_qpos] - q)) < 0.005 and steps > 150:
                 break
         err = float(np.linalg.norm(self._grasp_centre() - target))
