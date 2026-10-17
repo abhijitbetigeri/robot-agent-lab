@@ -21,7 +21,8 @@ ARM_JOINTS = ["shoulder_pan", "shoulder_lift", "elbow_flex", "wrist_flex", "wris
 GRIPPER_OPEN = 1.4
 GRIPPER_CLOSED = -0.10
 HOVER_Z = 0.07
-GRASP_Z = 0.013          # height of the grasp centre (cube mid-height is 0.010)
+TUBE_H = 0.030
+GRASP_Z = 0.020          # grasp centre height: above the tube midpoint (tube is 3 cm tall)
 # Site frame facts (measured): finger axis = site +x; jaws close along site z; closed grasp centre = site + R @ GRASP_OFFSET
 PARK_Q = np.array([0.0, -1.7, 1.6, 0.0, 0.0])   # folded back: out of the camera view, no floor contact
 GRASP_OFFSET = np.array([0.001, 0.0, -0.002])   # measured: zero push on descent, holds on every block
@@ -30,6 +31,7 @@ IK_SEEDS = [np.array([0.0, 0.6, 1.0, -1.5, 0.0]), np.array([0.0, 1.2, 0.9, -1.6,
 BLOCKS = ["red", "green", "blue"]
 BINS = {"red": "bin_red", "blue": "bin_blue"}  # green has no rack on purpose
 IN_BIN_RADIUS = 0.035
+IN_BIN_MAX_Z = 0.05
 
 
 @dataclass
@@ -104,7 +106,7 @@ class LabEnv:
             a = self.block_qpos[c]
             base = self.m.body(f"block_{c}").pos
             jitter = self.rng.uniform(-0.02, 0.02, size=2)
-            self.d.qpos[a:a + 3] = [base[0] + jitter[0], base[1] + jitter[1], 0.011]
+            self.d.qpos[a:a + 3] = [base[0] + jitter[0], base[1] + jitter[1], TUBE_H / 2 + 0.001]
             self.d.qpos[a + 3:a + 7] = [1, 0, 0, 0]
         # arm: home = hover over the bench centre, open gripper
         self.d.ctrl[self.grip_ctrl] = GRIPPER_OPEN
@@ -201,7 +203,7 @@ class LabEnv:
         for c in BLOCKS:
             where[c] = "table"
             for b, bxy in bins.items():
-                if np.linalg.norm(pos[c][:2] - bxy) < IN_BIN_RADIUS and pos[c][2] < 0.03:
+                if np.linalg.norm(pos[c][:2] - bxy) < IN_BIN_RADIUS and pos[c][2] < IN_BIN_MAX_Z:
                     where[c] = b
         success = (where["red"] == "red" and where["blue"] == "blue" and where["green"] == "table"
                    and not self._holding() and self._gripper_cmd == "open")

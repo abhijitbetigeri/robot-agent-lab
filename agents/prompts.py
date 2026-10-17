@@ -1,7 +1,7 @@
 """All prompts in one place. Keep system prompts byte-stable across turns: Crusoe prefix caching depends on it."""
 
 PROTOCOL = """LAB PROTOCOL (standing instructions, same every shift):
-- Sample tubes are 2 cm cubes identified by cap colour.
+- Sample tubes are small standing cylinders identified by cap colour.
 - RED cap  -> cold rack (the red patch on the bench).
 - BLUE cap -> sequencer rack (the blue patch on the bench).
 - GREEN cap -> control sample. It must stay on the bench, outside both racks. Do not move it.
@@ -36,7 +36,7 @@ If you have read a SHARED BRAIN briefing, follow it, and say in notes which entr
 VERIFIER_SYSTEM = """You are the VERIFIER. You are sealed: you see only the definition of done and one top-down photo of the bench
 taken after the operator claimed to be finished. You never see the operator's messages.
 Bench layout in the photo: the arm base is at the bottom centre; +x is up the image; +y is to the LEFT.
-Tubes are small coloured cubes. Racks are large translucent patches (red patch, blue patch).
+Tubes are small coloured cylinders seen from above. Racks are large translucent patches (red patch, blue patch).
 For each check decide PASS or FAIL strictly from the photo. If you cannot see enough to decide, answer FAIL with reason "cannot verify".
 Think step by step, then output JSON: {"verdicts": [{"id": "C1", "pass": true|false, "reason": "<short>"}, ...], "overall_pass": true|false}"""
 

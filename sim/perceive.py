@@ -50,6 +50,6 @@ def detect(image_path: str, cam_pos, fovy_deg: float, min_pixels: int = 12) -> d
             if n < (600 if is_rack else min_pixels):   # racks are ~5k px; a tube's anti-aliased edge is ~100
                 continue
             vs, us = np.nonzero(mask)
-            x, y = pixel_to_bench(us.mean(), vs.mean(), w, h, cam_pos, fovy_deg, obj_z=0.001 if is_rack else 0.01)
+            x, y = pixel_to_bench(us.mean(), vs.mean(), w, h, cam_pos, fovy_deg, obj_z=0.001 if is_rack else 0.03)  # tube top disc
             (racks if is_rack else tubes).append({"color": color, "x": x, "y": y, "pixels": n})
     return {"tubes": tubes, "racks": racks}

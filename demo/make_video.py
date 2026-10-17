@@ -189,6 +189,12 @@ def clip_seconds(ffmpeg, clip: Path) -> float:
     return int(m.group(1)) * 3600 + int(m.group(2)) * 60 + float(m.group(3)) if m else 0.0
 
 
+def ver_frame(frames: Path, episode: int) -> Path:
+    """Last verifier-camera frame of an episode (filenames carry the call counter, so pick by prefix)."""
+    cands = sorted(frames.glob(f"ep{episode:02d}_ver_*.jpg"))
+    return cands[-1] if cands else cands
+
+
 def main():
     import imageio_ffmpeg
     ffmpeg = imageio_ffmpeg.get_ffmpeg_exe()
@@ -234,7 +240,7 @@ def main():
     l1 = log_lines(log, 1, ("gripper", "] lift"), limit=8)
     segs.append(("still", slide("Shift 1: the robot says it is done. It is not.", [("what the robot actually did (real log):", DIM)] + l1 +
                  [("", FG), ("robot: \"done\"", ACC), ("independent checker: FAIL", RED), ("  the red tube is not in the red rack", RED)],
-                 image=frames / "ep01_ver_038.jpg", img_caption="the photo the checker judged from", footer="runs/sweep_brain.log, shift 1"),
+                 image=ver_frame(frames, 1), img_caption="the photo the checker judged from", footer="runs/sweep_brain.log, shift 1"),
         "Shift one, with empty memory. The gripper reports nothing held. The robot lifts nothing, places nothing, and says it is done anyway. "
         "An independent checker that only sees the photo says no. Agents overclaim. That is why the check is independent."))
 
@@ -248,7 +254,7 @@ def main():
     segs.append(("still", slide("The shared memory: learn once, update when the bench changes",
                  [("notes the next shift read before starting:", DIM)] + brief + [("", FG), ("the blue rack moved at shift 3. Memory of its position:", DIM)] + hl +
                  [("", FG), ("old position handed to an agent after the move: never", GRN)],
-                 image=frames / "ep03_ver_035.jpg", img_caption="shift 3: rack moved, tube placed correctly", footer="brain/ledger.py · Temporal Validity (2606.26511) · Zep (2501.13956) · ACE (2510.04618)"),
+                 image=ver_frame(frames, 3), img_caption="shift 3: rack moved, tube placed correctly", footer="brain/ledger.py · Temporal Validity (2606.26511) · Zep (2501.13956) · ACE (2510.04618)"),
         "After every shift, notes go into a shared memory. Shift two read the gripper lesson and succeeded. "
         "At shift three the rack moved, and the memory replaced the old position. Nothing is deleted; the old fact just stops being used."))
 

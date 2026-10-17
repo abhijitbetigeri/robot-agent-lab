@@ -17,7 +17,7 @@ Start from Menagerie `scene.xml` (includes `so101.xml`, floor, light). Add:
 
 ```xml
 <worldbody>
-  <!-- blocks: 2 cm cubes, free joints -->
+  <!-- tubes: standing cylinders 2 cm wide, 3 cm tall, free joints -->
   <body name="block_red"   pos="0.22  0.06 0.01"><freejoint/><geom name="g_red"   type="box" size="0.01 0.01 0.01" rgba="0.9 0.1 0.1 1" mass="0.02" condim="3" friction="1 .03 .003"/></body>
   <body name="block_green" pos="0.26 -0.02 0.01"><freejoint/><geom name="g_green" type="box" size="0.01 0.01 0.01" rgba="0.1 0.8 0.1 1" mass="0.02" condim="3" friction="1 .03 .003"/></body>
   <body name="block_blue"  pos="0.19 -0.08 0.01"><freejoint/><geom name="g_blue"  type="box" size="0.01 0.01 0.01" rgba="0.1 0.2 0.9 1" mass="0.02" condim="3" friction="1 .03 .003"/></body>
