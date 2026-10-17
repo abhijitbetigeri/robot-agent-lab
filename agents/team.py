@@ -46,10 +46,10 @@ HARNESS_TOOLS = [
 OBSERVE_ONLY = {"park", "look", "scene_state", "report_progress"}
 
 
-def operate(llm: Crusoe, env, dod: dict, briefing: str, goal: str, monitor, max_turns: int = 45, log=print) -> dict:
+def operate(llm: Crusoe, env, dod: dict, briefing: str, goal: str, monitor, max_turns: int = 45, log=print, playbook: str = "") -> dict:
     """Run the operator loop. Returns {claim, turns, decision, monitor_reason}."""
     tools = env.tool_schemas() + HARNESS_TOOLS
-    messages = [{"role": "system", "content": P.OPERATOR_SYSTEM},
+    messages = [{"role": "system", "content": P.OPERATOR_SYSTEM + playbook},
                 {"role": "user", "content": f"GOAL: {goal}\n\n{_dod_text(dod)}\n\n{briefing}\n\nBegin. Start with look()."}]
     claim, decision, reason = None, "continue", ""
     progress, infeasible = None, False

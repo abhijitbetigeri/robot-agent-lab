@@ -19,7 +19,7 @@ GOAL = "Put tonight's samples where they belong."
 
 
 def run_episode(llm: Crusoe, episode: int, seed: int, brain: Brain | None, gotchas: Gotchas | None = None,
-                out_dir: str | Path = "runs", log=print) -> dict:
+                out_dir: str | Path = "runs", log=print, playbook: str | None = None) -> dict:
     out_dir = Path(out_dir)
     env = LabEnv(seed=seed, episode=episode, gotchas=gotchas, frames_dir=out_dir / "frames")
     usage0 = llm.usage.totals()
@@ -36,10 +36,16 @@ def run_episode(llm: Crusoe, episode: int, seed: int, brain: Brain | None, gotch
     if dod.get("questions_for_human"):
         log("planner questions: " + json.dumps(dod["questions_for_human"]))
 
+    if playbook is None:  # default: the current learned playbook, if the improver has kept one
+        try:
+            from improve import load_playbook, playbook_text
+            playbook = playbook_text(load_playbook())
+        except Exception:  # noqa: BLE001
+            playbook = ""
     monitor = team.Monitor()
     result, replans = None, 0
     while True:
-        result = team.operate(llm, env, dod, briefing, GOAL, monitor, log=log)
+        result = team.operate(llm, env, dod, briefing, GOAL, monitor, log=log, playbook=playbook)
         if result["decision"] == "replan" and replans < 2:
             replans += 1
             dod = team.plan(llm, GOAL, briefing, failure_summary=result["monitor_reason"])
@@ -60,7 +66,7 @@ def run_episode(llm: Crusoe, episode: int, seed: int, brain: Brain | None, gotch
 
     claimed = bool(result["claim"] and result["claim"].get("done"))
     rec = {
-        "episode": episode, "seed": seed, "brain": brain is not None,
+        "episode": episode, "seed": seed, "brain": brain is not None, "playbook": bool(playbook),
         "success": truth["success"], "claimed_done": claimed, "verifier_pass": verdicts.get("overall_pass", False),
         "false_done": claimed and not truth["success"],
         "verifier_correct": (verdicts.get("overall_pass", False) == truth["success"]) if frame else None,

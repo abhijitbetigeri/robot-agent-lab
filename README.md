@@ -10,6 +10,15 @@ simulated SO-101 arm. The human types one line, **"Put tonight's samples where t
 Every agent reads a **shared, time-versioned brain** before its shift and writes back after. A **sealed camera verifier**
 decides what "done" means. The claim we prove with numbers: **shift four is cheaper and more honest than shift one.**
 
+## The four things the system does
+
+| | What | Where | How we know it works |
+|---|---|---|---|
+| **1. Collaborate through shared memory** | every agent reads the brain before its shift and the curator writes deltas after; facts carry provenance and validity windows, and a changed value supersedes the old one | `brain/ledger.py`, `agents/team.py::curate`, `auto_facts` | with-brain vs no-brain table on identical seeds; stale-fact servings after the rack moves |
+| **2. Independently verify their work** | a sealed verifier that sees only the checks and a top-down photo, never the operator; the operator's done claim is diffed against the tool log and must cite evidence per check | `team.py::verify`, `claim_vs_trace` | verifier accuracy measured against sim ground truth; false-done claims caught |
+| **3. Detect failures** | rule-based monitor: exact-repeat loops, observe-only stalls, progress-interval collapse, infeasible flag, budget, camera down → `continue / replan / stop / ping` | `team.py::Monitor` | every decision and its reason is logged per shift |
+| **4. Improve their outputs autonomously** | the improver rewrites the operator playbook from shift history and the change is **kept only if it scores at least as well on a held-out seed** the team has never run | `improve.py`, `runs/playbook.json` | before/after score on the held-out shift, with the version history |
+
 ## What is in the loop
 
 | Agent | Model (Crusoe Managed Inference) | Job |
