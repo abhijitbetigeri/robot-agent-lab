@@ -1,4 +1,4 @@
-# Robot Agent Lab — the overnight shift in a small biology lab, run by agents
+# Robot Agent Lab — the overnight shift in a small science lab, run by agents
 
 Recursive Agents Hackathon · Crusoe × Cerebral Valley · Sat 2026-10-17 · Shack15
 Track: **Shared Brain** (primary), with Done Means Done built in. No physical hardware: MuJoCo sim of the SO-101 arm.

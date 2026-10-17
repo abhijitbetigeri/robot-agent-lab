@@ -203,14 +203,14 @@ def main():
 
     # 1. use case
     segs.append(("still", slide("Robot Agent Lab — the problem", [
-        ("A small biology lab. Sample tubes arrive all day with coloured caps.", FG),
+        ("A small science lab. Sample tubes arrive all day with coloured caps.", FG),
         ("Before the night runs, every tube must be in the right place:", FG),
         ("   red cap  -> cold rack", RED), ("   blue cap -> sequencer rack", BLU), ("   green cap = control, must stay on the bench", GRN), ("", FG),
         ("Today a technician does this twice a night.", FG),
         ("A tube in the wrong rack ruins a run that costs more than the robot.", FG), ("", FG),
         ("Can a team of AI agents run that night shift with nobody watching?", ACC)], mono=False, image=bench_picture(), img_w=600,
         img_caption="the simulated bench (MuJoCo, SO-101 arm)", footer="Recursive Agents Hackathon · Crusoe x Cerebral Valley · Oct 17 2026"),
-        "Robot Agent Lab. The problem: a small biology lab. Sample tubes arrive all day with coloured caps. Before the night runs, "
+        "Robot Agent Lab. The problem: a small science lab. Sample tubes arrive all day with coloured caps. Before the night runs, "
         "red caps go to the cold rack, blue caps to the sequencer rack, and the green control stays on the bench. "
         "A tube in the wrong rack ruins an expensive run. Can a team of agents run the night shift with nobody watching?"))
 
