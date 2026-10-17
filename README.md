@@ -75,7 +75,7 @@ uv run python run_episode.py --episode 9 --camera-down   # the one time it pings
 - **Crusoe Managed Inference**: every call. We log `usage.prompt_tokens_details.cached_tokens` per call; at event time the endpoint returned no cache details for the Nemotron models, so the cached-token column reads 0 and we do not claim a cache saving.
 - **NVIDIA Nemotron**: all five roles; Nano Omni is the only agent that *looks*.
 - **NVIDIA NemoClaw / OpenShell**: the operator is the only agent that executes generated motion code, so it runs in an OpenShell sandbox whose network policy allows one host (`nemoclaw/policy.yaml`).
-- **You.com**: the researcher tool the planner can call when a tool error is outside the protocol; results enter the brain as dated, sourced facts.
+- **You.com**: `research(question)` is a tool the operator can call when something is outside the protocol (`agents/researcher.py`, You.com Search API). Answers come back as cited snippets with a retrieval date, so the curator can store them as sourced facts.
 
 ## Papers we implemented (not just cited)
 

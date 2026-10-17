@@ -7,6 +7,7 @@ from collections import Counter
 
 from llm.crusoe import Crusoe, content_of, parse_json, image_part
 from agents import prompts as P
+from agents.researcher import SCHEMA as RESEARCH_SCHEMA, research
 
 
 # ------------------------------------------------------------------------------------------------ planner
@@ -43,12 +44,12 @@ HARNESS_TOOLS = [
         "description": "Declare the job finished. evidence maps each check id to the call_ids of tool results that prove it. notes: what surprised you, for the shared brain.",
         "parameters": {"type": "object", "properties": {"evidence": {"type": "object"}, "notes": {"type": "string"}}, "required": ["evidence"]}}},
 ]
-OBSERVE_ONLY = {"park", "look", "scene_state", "report_progress"}
+OBSERVE_ONLY = {"park", "look", "scene_state", "report_progress", "research"}
 
 
 def operate(llm: Crusoe, env, dod: dict, briefing: str, goal: str, monitor, max_turns: int = 45, log=print, playbook: str = "") -> dict:
     """Run the operator loop. Returns {claim, turns, decision, monitor_reason}."""
-    tools = env.tool_schemas() + HARNESS_TOOLS
+    tools = env.tool_schemas() + HARNESS_TOOLS + [RESEARCH_SCHEMA]
     messages = [{"role": "system", "content": P.OPERATOR_SYSTEM + playbook},
                 {"role": "user", "content": f"GOAL: {goal}\n\n{_dod_text(dod)}\n\n{briefing}\n\nBegin. Start with look()."}]
     claim, decision, reason = None, "continue", ""
@@ -70,6 +71,9 @@ def operate(llm: Crusoe, env, dod: dict, briefing: str, goal: str, monitor, max_
                         infeasible = bool(args.get("infeasible", False))
                         result = {"ok": True, "recorded": progress}
                         env.trace.add(name, args, result)
+                    elif name == "research":
+                        result = research(str(args.get("question", "")))
+                        env.trace.add(name, args, {"ok": result.get("ok"), "hits": len(result.get("hits", []))})
                     elif name == "claim_done":
                         claim = {"done": True, "evidence": args.get("evidence") or {}, "notes": args.get("notes", "")}
                         result = {"ok": True, "recorded": "claim"}
